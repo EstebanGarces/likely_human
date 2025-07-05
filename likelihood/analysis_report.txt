@@ -1,0 +1,314 @@
+COMPREHENSIVE DISTRIBUTION ANALYSIS REPORT
+==========================================
+
+Dataset: summary_metrics_analysis.csv
+Number of observations: 10000 
+Analysis date: 20273 
+
+VARIABLES ANALYZED:
+- Mean_Coherence 
+- Mean_Diversity 
+- Variance_Coherence 
+- Variance_Diversity 
+
+
+UNIVARIATE DISTRIBUTION ANALYSIS:
+==================================
+
+ Mean_Coherence :
+  Best distribution: normal 
+  Parameters: -2.7824, 0.4074 
+  AIC: 10343.25 
+  BIC: 10357.65 
+
+ Mean_Diversity :
+  Best distribution: weibull 
+  Parameters: 23.7, 0.9589 
+  AIC: -31216.46 
+  BIC: -31202.06 
+
+ Variance_Coherence :
+  Best distribution: lognormal 
+  Parameters: 1.9759, 0.2164 
+  AIC: 37005.09 
+  BIC: 37019.5 
+
+ Variance_Diversity :
+  Best distribution: lognormal 
+  Parameters: -4.4659, 0.3644 
+  AIC: -9374.69 
+  BIC: -9364.59 
+
+
+BIVARIATE DISTRIBUTION ANALYSIS:
+================================
+
+ COHERENCE PAIR:
+  Best model: bivariate_normal 
+  Model comparison (top 3):
+    1. bivariate_normal (AIC: -16949.59)
+    2. gaussian_copula (AIC: -387.95)
+    3. t_copula (AIC: -385.9)
+  Mean: -2.7824, 0.9348 
+  Correlation: -0.1834 
+  AIC: -16949.59 
+
+ VARIANCE PAIR:
+  Best model: bivariate_normal 
+  Model comparison (top 3):
+    1. bivariate_normal (AIC: -3452.01)
+    2. frank_copula (AIC: 0.99)
+    3. gumbel_copula (AIC: 1.44)
+  Mean: 7.2176, 0.0127 
+  Correlation: 0.0037 
+  AIC: -3452.01 
+
+
+UNIMODALITY TEST RESULTS:
+=========================
+Univariate tests: See console output for Hartigan's dip test results
+Bivariate tests: See console output for detailed unimodality analysis
+
+
+FILES CREATED:
+==============
+- Individual distribution plots: *_distribution.png
+- Combined distribution plot: combined_distributions.png
+- Bivariate 2D plots: bivariate_2d_*.png
+- Bivariate 3D plots: bivariate_3d_*.html
+- Univariate parameters: distribution_summary.csv
+- Bivariate parameters: bivariate_summary.csv
+- Complete results: distribution_analysis_results.RData
+- This report: analysis_report.txt
+
+
+FOR LIKELIHOOD COMPUTATIONS:
+============================
+Load the .RData file and access:
+- distribution_summary: for univariate distribution parameters
+- bivariate_summary: for bivariate distribution parameters
+- All fitted objects available in fit_results and bivariate_fits
+
+
+
+I. Temporal
+
+
+
+
+
+
+II. Summarizing metric
+
+\subsection{Text Quality Metric Validation}
+
+We evaluated two approaches for predicting human quality ratings using coherence and diversity metrics: (1) normalized differences from human baselines, and (2) distances from empirical population vectors.
+
+\subsubsection{Analysis 1: Human Baseline Approach}
+For each generation method within the same dataset, we calculated normalized differences from human-written text:
+\begin{align}
+\text{coherence\_diff} &= \frac{\text{method\_coherence} - \text{human\_coherence}}{\text{length}} \\
+\text{diversity\_diff} &= \frac{\text{method\_diversity} - \text{human\_diversity}}{\text{length}}
+\end{align}
+
+These differences were z-normalized across all methods and combined into a mean composite score:
+\begin{equation}
+\text{mean\_composite} = \frac{z(\text{coherence\_diff}) + z(\text{diversity\_diff})}{2}
+\end{equation}
+
+\subsubsection{Analysis 2: Empirical Distance Approach}
+We computed Euclidean distances from empirical reference vectors estimated from 10,000 generations:
+\begin{align}
+\boldsymbol{\mu}_{\text{ref}} &= (-2.782, 0.935) \text{ (coherence, diversity means)} \\
+\boldsymbol{\sigma}_{\text{ref}} &= (7.218, 0.013) \text{ (coherence, diversity variances)}
+\end{align}
+
+\subsubsection{Results}
+Spearman correlations with human ratings revealed that Analysis 1 significantly outperformed Analysis 2 (Table~\ref{tab:correlations}). The mean composite score from Analysis 1 achieved the strongest correlation (\textit{r} = 0.527, \textit{p} < 0.001), indicating that methods generating more diverse content than human baselines receive higher quality ratings.
+
+\begin{table}[h]
+\centering
+\caption{Spearman correlations between quality metrics and human ratings}
+\label{tab:correlations}
+\begin{tabular}{lcc}
+\hline
+\textbf{Metric} & \textbf{Correlation} & \textbf{p-value} \\
+\hline
+\textbf{Analysis 1: Human Baseline} & & \\
+\quad Mean Composite & \textbf{0.527} & \textbf{< 0.001} \\
+\quad Diversity Difference & 0.481 & < 0.001 \\
+\quad Variance Composite & -0.525 & < 0.001 \\
+\quad Diversity Variance Difference & -0.449 & < 0.001 \\
+\quad Coherence Variance Difference & -0.134 & 0.034 \\
+\quad Overall Composite & -0.106 & 0.096 \\
+\quad Coherence Difference & -0.095 & 0.134 \\
+\hline
+\textbf{Analysis 2: Empirical Distance} & & \\
+\quad Mean Distance & 0.318 & < 0.001 \\
+\quad Variance Distance & -0.138 & 0.017 \\
+\quad Combined Distance & -0.078 & 0.178 \\
+\hline
+\end{tabular}
+\end{table}
+
+These findings suggest that text quality is best predicted by comparing generation methods to human-written baselines rather than absolute population statistics, with diversity improvements being particularly important for perceived quality.
+
+
+III. Likelihood based
+
+
+# Parameters for the first bivariate normal distribution (coherence_mean, diversity_mean)
+mean1 <- c(-2.782422166, 0.93484131)
+variance1_x <- 0.165954995
+variance1_y <- 0.003871692
+covariance1_xy <- -0.004649588
+
+# Construct covariance matrix for first distribution
+cov_matrix1 <- matrix(c(variance1_x, covariance1_xy,
+                        covariance1_xy, variance1_y), 
+                      nrow = 2, ncol = 2)
+
+# Parameters for the second bivariate normal distribution (coherence_variance, diversity_variance)
+mean2 <- c(7.217569204, 0.01266436)
+variance2_x <- 2.255830363
+variance2_y <- 7.62E-05
+covariance2_xy <- 4.85E-05
+
+
+1. Correlation between Likelihood_MeanDist and human_mean:
+   Spearman's rho: 0.4906
+   p-value: 1.427e-19
+   95% Confidence Interval: Not available for Spearman correlation
+   Sample size (valid pairs): 300
+   Significance: p < 0.001 (highly significant)
+
+2. Correlation between Likelihood_VarDist and human_mean:
+   Spearman's rho: 0.2226
+   p-value: 1.008e-04
+   95% Confidence Interval: Not available for Spearman correlation
+   Sample size (valid pairs): 300
+   Significance: p < 0.001 (highly significant)
+
+=== CORRELATION SUMMARY (ALL DATA) ===
+   Mean Distribution vs human_mean: rho = 0.4906 , p = 1.43e-19
+   Variance Distribution vs human_mean: rho = 0.2226 , p = 1.01e-04
+   Stronger correlation: Mean Distribution (|rho| = 0.4906 )
+
+=== CORRELATION ANALYSIS EXCLUDING METHOD='Human' ===
+   Original dataset size: 300
+   Rows with method='Human': 50
+   Filtered dataset size: 250
+
+3. Correlation between Likelihood_MeanDist and human_mean (excluding method='Human'):
+   Spearman's rho: 0.4579
+   p-value: 2.329e-14
+   95% Confidence Interval: Not available for Spearman correlation
+   Sample size (valid pairs): 250
+   Significance: p < 0.001 (highly significant)
+
+4. Correlation between Likelihood_VarDist and human_mean (excluding method='Human'):
+   Spearman's rho: 0.2575
+   p-value: 3.774e-05
+   95% Confidence Interval: Not available for Spearman correlation
+   Sample size (valid pairs): 250
+   Significance: p < 0.001 (highly significant)
+
+=== COMPARATIVE SUMMARY ===
+
+MEAN DISTRIBUTION vs human_mean:
+   All data:        rho = 0.4906 , p = 1.43e-19 , n = 300
+   Excluding Human: rho = 0.4579 , p = 2.33e-14 , n = 250
+   Difference:      Δrho = -0.0327
+
+VARIANCE DISTRIBUTION vs human_mean:
+   All data:        rho = 0.2226 , p = 1.01e-04 , n = 300
+   Excluding Human: rho = 0.2575 , p = 3.77e-05 , n = 250
+   Difference:      Δrho = 0.0349
+
+=== WHICH DISTRIBUTION PERFORMS BETTER? ===
+   All data:         Mean Distribution  (|rho| =  0.4906 )
+   Excluding Human:  Mean Distribution  (|rho| =  0.4579 )
+
+
+IV. Baselines:
+
+PCA
+
+\section{Principal Component Analysis of Text Quality Metrics}
+
+We conducted a Principal Component Analysis on four automated text quality metrics: coherence mean, coherence variance, diversity mean, and diversity variance. The analysis aimed to identify underlying dimensions of text quality and assess their relationship with human evaluations.
+
+\subsection{Dimensional Structure}
+
+The PCA revealed a clear two-dimensional structure underlying the text quality metrics. The first two principal components accounted for 88.76\% of the total variance in the data (Table~\ref{tab:pca_summary}). PC1 explained 58.23\% of the variance, while PC2 contributed an additional 30.53\%. The remaining components (PC3: 8.87\%, PC4: 2.38\%) captured minimal variance, suggesting that text quality can be effectively represented in a reduced two-dimensional space.
+
+\begin{table}[h!]
+\centering
+\caption{Principal Component Analysis Summary}
+\label{tab:pca_summary}
+\begin{tabular}{lrr}
+\toprule
+Component & Eigenvalue & Variance (\%) \\
+\midrule
+PC1 & 2.321 & 58.23 \\
+PC2 & 1.217 & 30.53 \\
+PC3 & 0.353 & 8.87 \\
+PC4 & 0.095 & 2.38 \\
+\midrule
+Cumulative (PC1+PC2) & -- & 88.76 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Component Interpretation}
+
+The variable loadings revealed distinct interpretations for each component. PC1 was primarily driven by diversity metrics, with diversity mean (34.9\% contribution) and diversity variance (33.3\% contribution) as the dominant loadings, alongside coherence mean (25.5\% contribution). This component appears to capture overall text variability and richness.
+
+PC2 was dominated by coherence variance (60.3\% contribution), with smaller contributions from coherence mean (16.4\%) and diversity variance (13.1\%). This component primarily reflects text consistency and coherence stability.
+
+\subsection{Correlation with Human Ratings}
+
+Spearman correlations between principal component scores and human ratings revealed significant relationships (Table~\ref{tab:correlations}). PC2 showed the strongest association with human judgments ($\rho = -0.48$, $p < 0.001$), indicating that texts with lower coherence variance (i.e., more consistent coherence) received higher human ratings. PC1 also demonstrated a significant negative correlation ($\rho = -0.36$, $p < 0.001$), suggesting that certain patterns of diversity and coherence negatively predict human preferences.
+
+\begin{table}[h!]
+\centering
+\caption{Correlations between Principal Components and Human Ratings}
+\label{tab:correlations}
+\begin{tabular}{lrrl}
+\toprule
+Component & Correlation ($\rho$) & P-value & Significance \\
+\midrule
+PC1 & $-0.358$ & $1.60 \times 10^{-10}$ & *** \\
+PC2 & $-0.480$ & $1.16 \times 10^{-18}$ & *** \\
+PC3 & $0.046$ & $0.428$ & ns \\
+PC4 & $0.045$ & $0.438$ & ns \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Implications}
+
+The results demonstrate that automated text quality metrics can be effectively reduced to two primary dimensions that collectively explain nearly 90\% of the variance. The significant negative correlations of both PC1 and PC2 with human ratings suggest that human evaluators prefer texts with specific patterns of coherence and diversity. Notably, PC2's strong correlation indicates that consistency in coherence (low coherence variance) is a key predictor of human text quality judgments, explaining approximately 23\% of the variance in human ratings ($r^2 = 0.48^2 = 0.23$).
+
+These findings provide valuable insights for automated text evaluation systems, suggesting that focusing on coherence consistency and controlled diversity patterns may better align with human quality assessments than individual metric optimization.
+
+
+
+MAUVE
+
+Method	MAUVE_Score	Frontier_Integral	Avg_Human_Rating	Correlation_with_Human	Correlation_P_Value
+temp (0.9)	0.3206650707	0.2815272164	2.42	0.2399212515	0.09330794982
+beam (5)	0.1006048456	0.4808037487	2	0.1726473666	0.2305466647
+CS (('0.6', '10'))	0.09206436241	0.493506124	2.3	0.2619802772	0.06608137369
+topk (50)	0.05239845238	0.5830718351	2.54	0.1867840085	0.1940051867
+topp (0.95)	0.02246656166	0.7185987841	2.69	0.2060320899	0.1511528707
+
+
+
+
+Q*Text: 
+
+Spearman: 0.5545, with p < 0.001
+
+
+
